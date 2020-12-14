@@ -2,21 +2,30 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+var port string
+
+func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := map[string]interface{}{
 		"message": "Healthy",
 	}
 	js, _ := json.Marshal(response)
 	_, _ = w.Write(js)
-
 }
-func main() {
-	http.HandleFunc("/health-check", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
 
+func init() {
+	defer flag.Parse()
+	flag.StringVar(&port, "port", "80", "Service port")
+}
+
+func main() {
+
+	http.HandleFunc("/health-check", healthCheck)
+	log.Printf("Listing on :%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
